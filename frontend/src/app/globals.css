@@ -152,3 +152,21 @@ textarea {
     scroll-behavior: auto !important;
   }
 }
+
+/* ---------- cursor-follow glow on every white card inside pages ---------- */
+main [class*="rounded-2xl"][class*="bg-white"]:not([role="dialog"]) {
+  --mx: 50%;
+  --my: 50%;
+  transition: border-color 0.2s, box-shadow 0.25s;
+}
+main [class*="rounded-2xl"][class*="bg-white"]:not([role="dialog"]):hover {
+  border-color: #a9d4da;
+  box-shadow: 0 10px 28px -14px rgba(15, 50, 59, 0.3);
+  background-image: radial-gradient(380px circle at var(--mx) var(--my), rgba(43, 122, 138, 0.1), transparent 65%);
+}
+
+/* 3D tilt cards (dashboard KPI cards) */
+[data-tilt] {
+  transition: transform 0.18s ease-out, box-shadow 0.25s, border-color 0.2s;
+  will-change: transform;
+}

@@ -34,7 +34,7 @@ export function BarFill({ pct, className = "bg-indigo-500", delay = 0 }: BarProp
 
 export function AnimatedBar(props: BarProps) {
   return (
-    <div className="h-2 overflow-hidden rounded-full bg-slate-100">
+    <div className="h-2 origin-center overflow-hidden rounded-full bg-slate-100 transition-transform duration-200 hover:scale-y-150">
       <BarFill {...props} />
     </div>
   );

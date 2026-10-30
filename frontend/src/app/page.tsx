@@ -161,7 +161,7 @@ export default function LandingPage() {
                 See features
               </a>
             </div>
-            <p className="mt-4 text-sm text-indigo-200/70">Demo accounts are one click away on the sign in page.</p>
+            
           </div>
 
           <div className="lg:pl-6">
@@ -247,7 +247,7 @@ export default function LandingPage() {
       {/* CTA */}
       <section className="mx-5 mb-16 max-w-6xl rounded-3xl bg-gradient-to-r from-indigo-800 to-indigo-950 px-6 py-14 text-center text-white lg:mx-auto">
         <h2 className="font-heading text-3xl font-semibold">See it in action</h2>
-        <p className="mx-auto mt-3 max-w-lg text-indigo-100/80">Sign in with a demo account and explore leads, properties and bookings.</p>
+        <p className="mx-auto mt-3 max-w-lg text-indigo-100/80">Sign in to explore leads, properties and bookings.</p>
         <Link
           href={ctaHref}
           className="mt-7 inline-flex items-center gap-2 rounded-lg bg-gold-500 px-6 py-3 font-medium text-indigo-950 transition hover:bg-gold-400"

@@ -9,6 +9,7 @@ import { NewBookingModal } from "@/components/bookings/NewBookingModal";
 import { PromoBanner } from "@/components/dashboard/PromoBanner";
 import { NewLeadModal } from "@/components/leads/NewLeadModal";
 import { AnimatedBar, AnimatedNumber } from "@/components/ui/Animated";
+import { InteractiveDonut } from "@/components/ui/InteractiveDonut";
 import { HealthBadge } from "@/components/ui/HealthBadge";
 import { StageBadge } from "@/components/ui/StageBadge";
 import { EmptyState, ErrorState, ListSkeleton } from "@/components/ui/States";
@@ -70,14 +71,14 @@ function StatCard({
     amber: "bg-amber-50 text-amber-600",
   };
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 transition duration-200 hover:-translate-y-0.5 hover:shadow-md">
+    <div data-tilt className="group rounded-2xl border border-slate-200 bg-white p-5">
       <div className="flex items-center justify-between">
         <p className="text-sm text-slate-500">{label}</p>
-        <span className={`flex h-9 w-9 items-center justify-center rounded-lg ${tones[tone]}`}>
+        <span className={`flex h-9 w-9 items-center justify-center rounded-lg transition duration-300 group-hover:rotate-6 group-hover:scale-110 ${tones[tone]}`}>
           <Icon size={18} />
         </span>
       </div>
-      <p className="mt-3 text-2xl font-semibold">{value}</p>
+      <p className="mt-3 text-2xl font-semibold transition duration-300 group-hover:translate-x-1">{value}</p>
       {hint && <p className="mt-1 text-xs text-slate-500">{hint}</p>}
     </div>
   );
@@ -327,8 +328,20 @@ export default function DashboardPage() {
       <section className="mb-6 grid gap-6 rounded-2xl border border-slate-200 bg-white p-5 sm:grid-cols-2">
         <div className="flex items-center gap-5">
           <div className="relative">
-            <Donut booked={data.units_booked} total={data.units_total} />
-            <span className="absolute inset-0 flex items-center justify-center text-lg font-semibold">{occupancy}%</span>
+            <InteractiveDonut
+              segments={[
+                { label: "Booked", value: data.units_booked, stroke: "stroke-indigo-600" },
+                { label: "Available", value: data.units_available, stroke: "stroke-emerald-300" },
+                {
+                  label: "Held",
+                  value: Math.max(0, data.units_total - data.units_booked - data.units_available),
+                  stroke: "stroke-amber-400",
+                },
+              ]}
+              centerValue={`${occupancy}%`}
+              centerLabel="booked"
+            />
+            
           </div>
           <div className="space-y-1 text-sm">
             <h2 className="font-semibold">Inventory</h2>

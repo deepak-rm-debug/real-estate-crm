@@ -2,20 +2,18 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Building2, Loader2 } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 
+import { Logo } from "@/components/ui/Logo";
+import { SkylineArt } from "@/components/ui/SkylineArt";
 import { useAuth } from "@/lib/auth";
-
-const DEMOS = [
-  { label: "Admin", email: "admin@crm.com", password: "Admin@123" },
-  { label: "Sales", email: "priya@crm.com", password: "Sales@123" },
-];
 
 export default function LoginPage() {
   const { user, loading, login } = useAuth();
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -34,7 +32,7 @@ export default function LoginPage() {
     setError("");
     setSubmitting(true);
     try {
-            await login(email.trim(), password);
+      await login(email.trim(), password);
       router.replace("/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
@@ -43,76 +41,75 @@ export default function LoginPage() {
     }
   }
 
+  const field =
+    "w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100";
+
   return (
-    <main className="flex min-h-screen items-center justify-center px-4">
-      <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-        <div className="mb-6 flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-600 text-white">
-            <Building2 size={22} />
-          </div>
-          <div>
-            <h1 className="text-xl font-semibold">Real Estate CRM</h1>
-            <p className="text-sm text-slate-500">Sign in to continue</p>
-          </div>
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-indigo-900 via-indigo-900 to-indigo-950 px-4 py-10">
+      <SkylineArt className="pointer-events-none absolute inset-x-0 bottom-0 h-40 w-full text-white/5" />
+
+      <div className="relative z-10 w-full max-w-md">
+        <div className="mb-6 flex flex-col items-center text-center text-white">
+          <Logo size={64} />
+          <h1 className="font-heading mt-4 text-3xl font-semibold">Estate CRM</h1>
+          <p className="mt-1 text-sm text-indigo-200/80">Sales workspace for real estate teams</p>
         </div>
 
-        <form onSubmit={onSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="email" className="mb-1 block text-sm font-medium">Email</label>
-            <input
-              id="email"
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
-              placeholder="you@company.com"
-            />
-          </div>
-          <div>
-            <label htmlFor="password" className="mb-1 block text-sm font-medium">Password</label>
-            <input
-              id="password"
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
-              placeholder="Your password"
-            />
-          </div>
+        <div className="rounded-2xl bg-white p-8 shadow-2xl">
+          <h2 className="text-lg font-semibold">Welcome back</h2>
+          <p className="mb-5 text-sm text-slate-500">Sign in to continue</p>
 
-          {error && (
-            <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
-          )}
+          <form onSubmit={onSubmit} className="space-y-4">
+            <div>
+              <label htmlFor="email" className="mb-1 block text-sm font-medium">Email</label>
+              <input
+                id="email"
+                type="email"
+                required
+                autoComplete="username"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className={field}
+                placeholder="you@company.com"
+              />
+            </div>
+            <div>
+              <label htmlFor="password" className="mb-1 block text-sm font-medium">Password</label>
+              <div className="relative">
+                <input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  required
+                  autoComplete="current-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className={`${field} pr-11`}
+                  placeholder="Your password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((s) => !s)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-slate-500 hover:bg-slate-100"
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+            </div>
 
-          <button
-            type="submit"
-            disabled={submitting}
-            className="flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 py-2.5 font-medium text-white transition hover:bg-indigo-700 disabled:opacity-60"
-          >
-            {submitting && <Loader2 size={16} className="animate-spin" />}
-            {submitting ? "Signing in..." : "Sign in"}
-          </button>
-        </form>
+            {error && (
+              <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
+            )}
 
-        <div className="mt-6 border-t border-slate-100 pt-4">
-          <p className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-400">Demo accounts</p>
-          <div className="flex gap-2">
-            {DEMOS.map((d) => (
-              <button
-                key={d.label}
-                type="button"
-                onClick={() => {
-                  setEmail(d.email);
-                  setPassword(d.password);
-                }}
-                className="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm hover:bg-slate-50"
-              >
-                {d.label}
-              </button>
-            ))}
-          </div>
+            <button
+              type="submit"
+              disabled={submitting}
+              className="flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 py-2.5 font-medium text-white transition hover:bg-indigo-700 disabled:opacity-60"
+            >
+              {submitting && <Loader2 size={16} className="animate-spin" />}
+              {submitting ? "Signing in..." : "Sign in"}
+            </button>
+          </form>
         </div>
       </div>
     </main>

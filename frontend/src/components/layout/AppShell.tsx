@@ -3,23 +3,14 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import {
-  BarChart3,
-  Building2,
-  CalendarCheck,
-  ChevronsLeft,
-  ChevronsRight,
-  LayoutDashboard,
-  Loader2,
-  LogOut,
-  Menu,
-  Search,
-  Users,
-} from "lucide-react";
+import { BarChart3, Building2, CalendarCheck, LayoutDashboard, Loader2, LogOut, Menu, Search, Users } from "lucide-react";
 
 import { CommandPalette } from "@/components/layout/CommandPalette";
 import { NotificationBell } from "@/components/layout/NotificationBell";
 import { UserMenu } from "@/components/layout/UserMenu";
+import { Logo } from "@/components/ui/Logo";
+import { SidebarArt } from "@/components/ui/SidebarArt";
+import { useCardEffects } from "@/hooks/useCardEffects";
 import { useAuth } from "@/lib/auth";
 
 const NAV = [
@@ -31,29 +22,22 @@ const NAV = [
 ];
 
 const STEP = 48; // item height 44px + 4px gap, used by the sliding indicator
-const STORAGE_KEY = "crm_sidebar_collapsed";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const { user, loading, logout } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const [collapsed, setCollapsed] = useState(false);
+  const [hovered, setHovered] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+
+  useCardEffects();
 
   useEffect(() => {
     if (!loading && !user) router.replace("/login");
   }, [user, loading, router]);
 
   useEffect(() => setOpen(false), [pathname]);
-
-  useEffect(() => {
-    try {
-      setCollapsed(localStorage.getItem(STORAGE_KEY) === "1");
-    } catch {
-      /* storage unavailable */
-    }
-  }, []);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -65,17 +49,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
-
-  function toggleCollapsed() {
-    setCollapsed((c) => {
-      try {
-        localStorage.setItem(STORAGE_KEY, c ? "0" : "1");
-      } catch {
-        /* ignore */
-      }
-      return !c;
-    });
-  }
 
   if (loading || !user) {
     return (
@@ -89,21 +62,21 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const visibleNav = NAV.filter((n) => !n.adminOnly || u.role === "admin");
   const activeIndex = visibleNav.findIndex((n) => pathname.startsWith(n.href));
 
-  const renderSidebar = (c: boolean) => (
-    <div className="flex h-full flex-col bg-indigo-900 text-white">
-      <Link href="/" className={`flex items-center gap-3 py-6 ${c ? "justify-center" : "px-5"}`}>
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gold-500 text-indigo-950">
-          <Building2 size={20} />
+  const fade = (expanded: boolean) => `transition-opacity duration-200 ${expanded ? "opacity-100" : "opacity-0"}`;
+
+  const renderSidebar = (expanded: boolean) => (
+    <div className="relative flex h-full flex-col overflow-hidden bg-gradient-to-b from-indigo-900 to-indigo-950 text-white">
+      <SidebarArt className="pointer-events-none absolute bottom-0 left-0 h-[320px] w-64" />
+
+      <Link href="/" className="relative z-10 flex items-center gap-3 px-4 py-6">
+        <Logo size={40} className="shrink-0" />
+        <div className={`leading-tight ${fade(expanded)}`}>
+          <p className="font-heading whitespace-nowrap text-lg font-semibold">Estate CRM</p>
+          <p className="whitespace-nowrap text-[11px] uppercase tracking-widest text-indigo-200/70">Sales workspace</p>
         </div>
-        {!c && (
-          <div className="leading-tight">
-            <p className="font-heading text-lg font-semibold">Estate CRM</p>
-            <p className="text-[11px] uppercase tracking-widest text-indigo-200/70">Sales workspace</p>
-          </div>
-        )}
       </Link>
 
-      <nav className="flex-1 px-3" aria-label="Main">
+      <nav className="relative z-10 flex-1 px-3" aria-label="Main">
         <div className="relative">
           <span
             aria-hidden="true"
@@ -119,14 +92,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 <li key={href}>
                   <Link
                     href={href}
-                    data-tip={c ? label : undefined}
-                    data-tip-side="right"
-                    className={`relative flex h-11 items-center rounded-lg text-sm font-medium transition-colors ${
-                      c ? "justify-center" : "gap-3 px-3.5"
-                    } ${active ? "font-semibold text-white" : "text-indigo-100/70 hover:bg-white/5 hover:text-white"}`}
+                    aria-label={label}
+                    className={`relative flex h-11 items-center gap-3 rounded-lg px-3.5 text-sm font-medium transition-colors ${
+                      active ? "font-semibold text-white" : "text-indigo-100/70 hover:bg-white/5 hover:text-white"
+                    }`}
                   >
                     <Icon size={20} className="shrink-0" />
-                    {!c && <span className="whitespace-nowrap">{label}</span>}
+                    <span className={`whitespace-nowrap ${fade(expanded)}`}>{label}</span>
                   </Link>
                 </li>
               );
@@ -135,59 +107,50 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       </nav>
 
-      <div className="border-t border-white/10 p-4">
-        {c ? (
-          <button
-            onClick={logout}
-            aria-label="Logout"
-            data-tip="Logout"
-            data-tip-side="right"
-            className="flex w-full items-center justify-center rounded-lg border border-white/20 py-2 text-white transition hover:bg-white/10"
-          >
-            <LogOut size={16} />
-          </button>
-        ) : (
-          <>
-            <div className="mb-3 flex items-center gap-3">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gold-500 text-sm font-semibold text-indigo-950">
-                {u.name.charAt(0).toUpperCase()}
-              </div>
-              <div className="min-w-0">
-                <p className="truncate text-sm font-medium">{u.name}</p>
-                <p className="text-xs capitalize text-indigo-200/70">{u.role}</p>
-              </div>
-            </div>
-            <button
-              onClick={logout}
-              className="flex w-full items-center justify-center gap-2 rounded-lg border border-white/20 px-3 py-2 text-sm text-white transition hover:bg-white/10"
-            >
-              <LogOut size={16} /> Logout
-            </button>
-          </>
-        )}
+      <div className="relative z-10 border-t border-white/10 p-3">
+        <div className="mb-3 flex items-center gap-3 px-1.5">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gold-500 text-sm font-semibold text-indigo-950">
+            {u.name.charAt(0).toUpperCase()}
+          </div>
+          <div className={`min-w-0 ${fade(expanded)}`}>
+            <p className="truncate text-sm font-medium">{u.name}</p>
+            <p className="text-xs capitalize text-indigo-200/70">{u.role}</p>
+          </div>
+        </div>
+        <button
+          onClick={logout}
+          aria-label="Logout"
+          className="flex h-10 w-full items-center gap-3 rounded-lg border border-white/15 px-3.5 text-sm text-white transition hover:bg-white/10"
+        >
+          <LogOut size={20} className="shrink-0" />
+          <span className={`whitespace-nowrap ${fade(expanded)}`}>Logout</span>
+        </button>
       </div>
     </div>
   );
 
   return (
-    <div className={`min-h-screen transition-[padding] duration-300 ${collapsed ? "md:pl-[72px]" : "md:pl-64"}`}>
-      {/* Desktop sidebar */}
-      <aside className={`fixed inset-y-0 left-0 z-30 hidden transition-[width] duration-300 md:block ${collapsed ? "w-[72px]" : "w-64"}`}>
-        {renderSidebar(collapsed)}
-        <button
-          onClick={toggleCollapsed}
-          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-          className="absolute -right-3 top-8 flex h-6 w-6 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 shadow transition hover:text-indigo-700"
-        >
-          {collapsed ? <ChevronsRight size={14} /> : <ChevronsLeft size={14} />}
-        </button>
+    <div className="min-h-screen md:pl-[72px]">
+      {/* Desktop sidebar: slim by default, expands over the page when the mouse is on it */}
+      <aside
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        onFocus={() => setHovered(true)}
+        onBlur={(e) => {
+          if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setHovered(false);
+        }}
+        className={`fixed inset-y-0 left-0 z-30 hidden overflow-hidden transition-[width,box-shadow] duration-300 ease-out md:block ${
+          hovered ? "w-64 shadow-2xl" : "w-[72px]"
+        }`}
+      >
+        {renderSidebar(hovered)}
       </aside>
 
       {/* Mobile drawer */}
       {open && (
         <div className="fixed inset-0 z-40 md:hidden">
           <div className="overlay-in absolute inset-0 bg-slate-900/50" onClick={() => setOpen(false)} />
-          <aside className="drawer-in relative h-full w-64 shadow-xl">{renderSidebar(false)}</aside>
+          <aside className="drawer-in relative h-full w-64 shadow-xl">{renderSidebar(true)}</aside>
         </div>
       )}
 

@@ -8,7 +8,7 @@ import { formatCurrency } from "@/lib/format";
 import type { Unit, UnitListResponse, UnitStatus } from "@/lib/types";
 
 const CELL: Record<UnitStatus, string> = {
-  available: "border-emerald-300 bg-emerald-50 text-emerald-900 hover:bg-emerald-100 hover:shadow cursor-pointer",
+  available: "border-emerald-300 bg-emerald-50 text-emerald-900 hover:-translate-y-0.5 hover:scale-105 hover:bg-emerald-100 hover:shadow-md cursor-pointer",
   held: "border-amber-300 bg-amber-50 text-amber-900 cursor-not-allowed",
   booked: "border-slate-200 bg-slate-100 text-slate-400 cursor-not-allowed",
 };
