@@ -7,6 +7,7 @@ import { MessageCircle, Phone, Plus, Search } from "lucide-react";
 
 import { NewLeadModal } from "@/components/leads/NewLeadModal";
 import { Avatar } from "@/components/ui/Avatar";
+import { HealthBadge } from "@/components/ui/HealthBadge";
 import { Pagination } from "@/components/ui/Pagination";
 import { StageBadge } from "@/components/ui/StageBadge";
 import { EmptyState, ErrorState, ListSkeleton } from "@/components/ui/States";
@@ -53,7 +54,12 @@ function LeadsList({ items }: { items: Lead[] }) {
                     </div>
                   </div>
                 </td>
-                <td className="px-4 py-3"><StageBadge stage={l.stage} /></td>
+                <td className="px-4 py-3">
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <StageBadge stage={l.stage} />
+                    <HealthBadge health={l.health} reasons={l.health_reasons} />
+                  </div>
+                </td>
                 <td className="px-4 py-3 text-slate-600">{l.assignee?.name ?? "Unassigned"}</td>
                 <td className="px-4 py-3">
                   <span className={isOverdue(l) ? "font-medium text-red-600" : "text-slate-600"}>

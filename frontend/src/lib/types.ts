@@ -41,6 +41,10 @@ export interface Lead {
   stage: LeadStage;
   assigned_to: number | null;
   assignee: UserBrief | null;
+  health: "hot" | "warm" | "cold" | null;
+  health_reasons: string[];
+  lost_reason: string | null;
+  preferred_type: string | null;
   follow_up_date: string | null;
   created_at: string;
   updated_at: string;
@@ -151,4 +155,57 @@ export interface DashboardData {
   units_available: number;
   units_booked: number;
   recent_bookings: Booking[];
+  priority_leads: PriorityLead[];
+}
+
+export interface PriorityLead {
+  id: number;
+  name: string;
+  phone: string;
+  stage: LeadStage;
+  health: "hot" | "warm" | "cold";
+  score: number;
+  reasons: string[];
+}
+
+export interface Match {
+  id: number;
+  project_name: string;
+  building_name: string;
+  unit_number: string;
+  floor: number;
+  type: string;
+  area_sqft: number;
+  price: string;
+  fit: string;
+}
+
+export interface SourceStat {
+  source: string;
+  leads: number;
+  booked: number;
+  lost: number;
+  conversion: number;
+}
+
+export interface ReasonStat {
+  reason: string;
+  count: number;
+}
+
+export interface TeamStat {
+  user_id: number;
+  name: string;
+  leads: number;
+  booked: number;
+  conversion: number;
+  overdue: number;
+  active_bookings: number;
+  revenue: string;
+}
+
+export interface AnalyticsData {
+  sources: SourceStat[];
+  lost_reasons: ReasonStat[];
+  team: TeamStat[];
 }

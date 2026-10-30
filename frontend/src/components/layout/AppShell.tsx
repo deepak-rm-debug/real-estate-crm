@@ -5,7 +5,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Building2, CalendarCheck, LayoutDashboard, Loader2, LogOut, Menu, Users } from "lucide-react";
+import { BarChart3, Building2, CalendarCheck, LayoutDashboard, Loader2, LogOut, Menu, Users } from "lucide-react";
 
 import { useAuth } from "@/lib/auth";
 
@@ -14,6 +14,7 @@ const NAV = [
   { href: "/leads", label: "Leads", icon: Users },
   { href: "/properties", label: "Properties", icon: Building2 },
   { href: "/bookings", label: "Bookings", icon: CalendarCheck },
+  { href: "/insights", label: "Insights", icon: BarChart3, adminOnly: true },
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -49,7 +50,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </Link>
 
       <nav className="flex-1 space-y-1 px-3">
-        {NAV.map(({ href, label, icon: Icon }) => {
+        {NAV.filter((n) => !n.adminOnly || user.role === "admin").map(({ href, label, icon: Icon }) => {
           const active = pathname.startsWith(href);
           return (
             <Link

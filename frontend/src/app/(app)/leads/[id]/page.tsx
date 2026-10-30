@@ -9,6 +9,9 @@ import { toast } from "sonner";
 
 import { NewBookingModal } from "@/components/bookings/NewBookingModal";
 import { EditLeadModal } from "@/components/leads/EditLeadModal";
+import { LostReasonModal } from "@/components/leads/LostReasonModal";
+import { MatchingUnits } from "@/components/leads/MatchingUnits";
+import { HealthBadge } from "@/components/ui/HealthBadge";
 import { Avatar } from "@/components/ui/Avatar";
 import { StageBadge } from "@/components/ui/StageBadge";
 import { EmptyState, ErrorState, ListSkeleton } from "@/components/ui/States";
@@ -49,6 +52,8 @@ export default function LeadDetailPage() {
   const [note, setNote] = useState("");
   const [showEdit, setShowEdit] = useState(false);
   const [showBook, setShowBook] = useState(false);
+  const [lostOpen, setLostOpen] = useState(false);
+  const [bookUnitId, setBookUnitId] = useState<number | undefined>(undefined);
 
   const lead = useQuery({
     queryKey: ["lead", id],
@@ -69,9 +74,11 @@ export default function LeadDetailPage() {
   }
 
   const stageMutation = useMutation({
-    mutationFn: (stage: string) => api(`/api/leads/${id}/stage`, { method: "PATCH", body: { stage } }),
+    mutationFn: (payload: { stage: string; lost_reason?: string }) =>
+      api(`/api/leads/${id}/stage`, { method: "PATCH", body: payload }),
     onSuccess: () => {
       toast.success("Stage updated");
+      setLostOpen(false);
       refreshAll();
     },
     onError: (e: Error) => toast.error(e.message),
@@ -129,6 +136,7 @@ export default function LeadDetailPage() {
             <Avatar name={l.name} size="lg" />
             <h1 className="text-2xl font-semibold">{l.name}</h1>
             <StageBadge stage={l.stage} />
+            <HealthBadge health={l.health} reasons={l.health_reasons} />
           </div>
           <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-sm text-slate-600">
             <span className="inline-flex items-center gap-1.5"><Phone size={14} /> {l.phone}</span>
@@ -156,6 +164,16 @@ export default function LeadDetailPage() {
         </div>
       </div>
 
+      {!isBooked && !isLost && (
+        <MatchingUnits
+          leadId={l.id}
+          onBook={(unitId) => {
+            setBookUnitId(unitId);
+            setShowBook(true);
+          }}
+        />
+      )}
+
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Left: details + notes */}
         <div className="space-y-6 lg:col-span-2">
@@ -180,6 +198,27 @@ export default function LeadDetailPage() {
                 <dt className="text-slate-500">Created</dt>
                 <dd className="font-medium">{formatDate(l.created_at)}</dd>
               </div>
+            {l.preferred_type && (
+                <div>
+                  <dt className="text-slate-500">Preferred type</dt>
+                  <dd className="font-medium">{l.preferred_type}</dd>
+                </div>
+              )}
+              {l.lost_reason && (
+                <div>
+                  <dt className="text-slate-500">Lost reason</dt>
+                  <dd className="font-medium text-red-600">{l.lost_reason}</dd>
+                </div>
+              )}
+              {l.health && (
+                <div className="sm:col-span-2">
+                  <dt className="text-slate-500">Why this priority</dt>
+                  <dd className="mt-1 flex flex-wrap items-center gap-2">
+                    <HealthBadge health={l.health} />
+                    <span className="text-xs text-slate-600">{l.health_reasons.join(" · ")}</span>
+                  </dd>
+                </div>
+              )}
             </dl>
           </section>
 
@@ -237,7 +276,9 @@ export default function LeadDetailPage() {
               className={inputClass}
               value={l.stage}
               disabled={isBooked || stageMutation.isPending}
-              onChange={(e) => stageMutation.mutate(e.target.value)}
+              onChange={(e) =>
+                e.target.value === "Lost" ? setLostOpen(true) : stageMutation.mutate({ stage: e.target.value })
+              }
             >
               {isBooked && <option value="Booked">Booked</option>}
               {LEAD_STAGES.filter((s) => s !== "Booked").map((s) => (
@@ -292,8 +333,23 @@ export default function LeadDetailPage() {
         </div>
       </div>
 
+      <LostReasonModal
+        open={lostOpen}
+        onClose={() => setLostOpen(false)}
+        pending={stageMutation.isPending}
+        onConfirm={(reason) => stageMutation.mutate({ stage: "Lost", lost_reason: reason })}
+      />
       <EditLeadModal key={l.updated_at} open={showEdit} onClose={() => setShowEdit(false)} lead={l} />
-      <NewBookingModal open={showBook} onClose={() => setShowBook(false)} defaultLeadId={l.id} />
+      <NewBookingModal
+        key={bookUnitId ?? "any"}
+        open={showBook}
+        onClose={() => {
+          setShowBook(false);
+          setBookUnitId(undefined);
+        }}
+        defaultLeadId={l.id}
+        defaultUnitId={bookUnitId}
+      />
     </div>
   );
 }

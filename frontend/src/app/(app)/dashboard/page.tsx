@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { AlertCircle, Building2, CalendarCheck, CalendarClock, IndianRupee, Users } from "lucide-react";
 
+import { HealthBadge } from "@/components/ui/HealthBadge";
 import { StageBadge } from "@/components/ui/StageBadge";
 import { EmptyState, ErrorState, ListSkeleton } from "@/components/ui/States";
 import { api } from "@/lib/api";
@@ -249,6 +250,34 @@ export default function DashboardPage() {
           <p className="text-sm text-slate-500">{bookedLeads} of {data.total_leads} leads booked</p>
         </div>
       </section>
+
+      {data.priority_leads.length > 0 && (
+        <section className="mb-6 rounded-2xl border border-slate-200 bg-white p-5">
+          <h2 className="font-semibold">Call these first</h2>
+          <p className="mb-3 text-xs text-slate-500">
+            Ranked by stage, follow-up urgency, recent activity and budget.
+          </p>
+          <ul className="divide-y divide-slate-100">
+            {data.priority_leads.map((p) => (
+              <li key={p.id}>
+                <Link
+                  href={`/leads/${p.id}`}
+                  className="flex flex-wrap items-center justify-between gap-2 py-2.5 transition hover:bg-slate-50"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium">{p.name}</p>
+                    <p className="text-xs text-slate-500">{p.reasons.join(" · ")}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <StageBadge stage={p.stage} />
+                    <HealthBadge health={p.health} />
+                  </div>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {/* Follow-ups */}
       <div className="grid gap-6 lg:grid-cols-2">

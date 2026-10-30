@@ -28,6 +28,7 @@ export function EditLeadModal({ open, onClose, lead }: Props) {
     source: lead.source ?? "",
     budget: lead.budget ? String(Number(lead.budget)) : "",
     follow_up_date: lead.follow_up_date ?? "",
+    preferred_type: lead.preferred_type ?? "",
   });
   const [error, setError] = useState("");
 
@@ -45,13 +46,14 @@ export function EditLeadModal({ open, onClose, lead }: Props) {
           phone: form.phone,
           email: form.email || null,
           source: form.source || null,
+          preferred_type: form.preferred_type || null,
           budget: form.budget ? Number(form.budget) : null,
           follow_up_date: form.follow_up_date || null,
         },
       }),
     onSuccess: () => {
       toast.success("Lead updated");
-      for (const key of ["lead", "leads", "dashboard"]) qc.invalidateQueries({ queryKey: [key] });
+      for (const key of ["lead", "leads", "dashboard", "matches"]) qc.invalidateQueries({ queryKey: [key] });
       setError("");
       onClose();
     },
@@ -94,6 +96,15 @@ export function EditLeadModal({ open, onClose, lead }: Props) {
         </div>
         <Field label="Follow-up date" htmlFor="e-follow">
           <input id="e-follow" type="date" className={inputClass} value={form.follow_up_date} onChange={set("follow_up_date")} />
+        </Field>
+
+        <Field label="Preferred type" htmlFor="e-type">
+          <select id="e-type" className={inputClass} value={form.preferred_type} onChange={set("preferred_type")}>
+            <option value="">Not decided</option>
+            {["1BHK", "2BHK", "3BHK", "Villa"].map((t) => (
+              <option key={t} value={t}>{t}</option>
+            ))}
+          </select>
         </Field>
 
         {error && <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}

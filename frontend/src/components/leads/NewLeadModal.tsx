@@ -20,6 +20,7 @@ const EMPTY = {
   budget: "",
   follow_up_date: "",
   assigned_to: "",
+  preferred_type: "",
 };
 
 interface Props {
@@ -48,6 +49,7 @@ export function NewLeadModal({ open, onClose, isAdmin, salesUsers }: Props) {
           phone: form.phone,
           email: form.email || null,
           source: form.source || null,
+          preferred_type: form.preferred_type || null,
           budget: form.budget ? Number(form.budget) : null,
           follow_up_date: form.follow_up_date || null,
           assigned_to: isAdmin && form.assigned_to ? Number(form.assigned_to) : null,
@@ -122,6 +124,16 @@ export function NewLeadModal({ open, onClose, isAdmin, salesUsers }: Props) {
               </select>
             </div>
           )}
+        </div>
+
+        <div>
+          <label htmlFor="lead-type" className="mb-1 block text-sm font-medium">Preferred type</label>
+          <select id="lead-type" className={inputClass} value={form.preferred_type} onChange={set("preferred_type")}>
+            <option value="">Not decided</option>
+            {["1BHK", "2BHK", "3BHK", "Villa"].map((t) => (
+              <option key={t} value={t}>{t}</option>
+            ))}
+          </select>
         </div>
 
         {error && (
