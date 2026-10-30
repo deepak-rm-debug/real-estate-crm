@@ -14,7 +14,6 @@ def seed():
             return
 
         admin = User(name="Admin", email="admin@crm.com", password_hash=hash_password("Admin@123"), role=UserRole.admin)
-        admin = User(name="Deepak", email="deepak@crm.com", password_hash=hash_password("Deepak@123"), role=UserRole.admin)
         priya = User(name="Priya", email="priya@crm.com", password_hash=hash_password("Sales@123"), role=UserRole.sales)
         arun = User(name="Arun", email="arun@crm.com", password_hash=hash_password("Sales@123"), role=UserRole.sales)
         db.add_all([admin, priya, arun])

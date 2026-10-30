@@ -107,25 +107,20 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       </nav>
 
-      <div className="relative z-10 border-t border-white/10 p-3">
-        <div className="mb-3 flex items-center gap-3 px-1.5">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gold-500 text-sm font-semibold text-indigo-950">
-            {u.name.charAt(0).toUpperCase()}
-          </div>
-          <div className={`min-w-0 ${fade(expanded)}`}>
-            <p className="truncate text-sm font-medium">{u.name}</p>
-            <p className="text-xs capitalize text-indigo-200/70">{u.role}</p>
-          </div>
-        </div>
-        <button
-          onClick={logout}
-          aria-label="Logout"
-          className="flex h-10 w-full items-center gap-3 rounded-lg border border-white/15 px-3.5 text-sm text-white transition hover:bg-white/10"
-        >
-          <LogOut size={20} className="shrink-0" />
-          <span className={`whitespace-nowrap ${fade(expanded)}`}>Logout</span>
-        </button>
-      </div>
+      
+<div className="relative z-10 border-t border-white/10 p-3">
+  <div className="flex items-center gap-3 px-1.5">
+    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gold-500 text-sm font-semibold text-indigo-950">
+      {u.name.charAt(0).toUpperCase()}
+    </div>
+
+    <div className={`min-w-0 ${fade(expanded)}`}>
+      <p className="truncate text-sm font-medium">{u.name}</p>
+      <p className="text-xs capitalize text-indigo-200/70">{u.role}</p>
+    </div>
+  </div>
+</div>
+
     </div>
   );
 
