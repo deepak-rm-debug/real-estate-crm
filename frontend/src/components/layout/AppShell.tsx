@@ -1,3 +1,5 @@
+
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -35,13 +37,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   const sidebar = (
-    <div className="flex h-full flex-col">
-      <div className="flex items-center gap-3 px-5 py-5">
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-600 text-white">
-          <Building2 size={18} />
+    <div className="flex h-full flex-col bg-indigo-900 text-white">
+      <Link href="/" className="flex items-center gap-3 px-5 py-6">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gold-500 text-indigo-950">
+          <Building2 size={20} />
         </div>
-        <span className="font-semibold">Real Estate CRM</span>
-      </div>
+        <div className="leading-tight">
+          <p className="font-heading text-lg font-semibold">Estate CRM</p>
+          <p className="text-[11px] uppercase tracking-widest text-indigo-200/70">Sales workspace</p>
+        </div>
+      </Link>
 
       <nav className="flex-1 space-y-1 px-3">
         {NAV.map(({ href, label, icon: Icon }) => {
@@ -50,8 +55,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <Link
               key={href}
               href={href}
-              className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition ${
-                active ? "bg-indigo-50 text-indigo-700" : "text-slate-600 hover:bg-slate-100"
+              className={`flex items-center gap-3 rounded-lg border-l-2 px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
+                active
+                  ? "border-gold-500 bg-white/15 font-semibold text-white shadow-sm"
+                  : "border-transparent text-indigo-100/70 hover:translate-x-1 hover:bg-white/5 hover:text-white"
               }`}
             >
               <Icon size={18} />
@@ -61,12 +68,19 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         })}
       </nav>
 
-      <div className="border-t border-slate-200 p-4">
-        <p className="truncate text-sm font-medium">{user.name}</p>
-        <p className="mb-3 text-xs capitalize text-slate-500">{user.role}</p>
+      <div className="border-t border-white/10 p-4">
+        <div className="mb-3 flex items-center gap-3">
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gold-500 text-sm font-semibold text-indigo-950">
+            {user.name.charAt(0).toUpperCase()}
+          </div>
+          <div className="min-w-0">
+            <p className="truncate text-sm font-medium">{user.name}</p>
+            <p className="text-xs capitalize text-indigo-200/70">{user.role}</p>
+          </div>
+        </div>
         <button
           onClick={logout}
-          className="flex w-full items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
+          className="flex w-full items-center justify-center gap-2 rounded-lg border border-white/20 px-3 py-2 text-sm text-white transition hover:bg-white/10"
         >
           <LogOut size={16} /> Logout
         </button>
@@ -76,14 +90,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen md:pl-64">
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 border-r border-slate-200 bg-white md:block">
-        {sidebar}
-      </aside>
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 md:block">{sidebar}</aside>
 
       {open && (
         <div className="fixed inset-0 z-40 md:hidden">
-          <div className="absolute inset-0 bg-slate-900/40" onClick={() => setOpen(false)} />
-          <aside className="relative h-full w-64 bg-white shadow-xl">{sidebar}</aside>
+          <div className="absolute inset-0 bg-slate-900/50" onClick={() => setOpen(false)} />
+          <aside className="relative h-full w-64 shadow-xl">{sidebar}</aside>
         </div>
       )}
 
@@ -91,10 +103,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <button onClick={() => setOpen(true)} aria-label="Open menu" className="rounded-lg p-1.5 hover:bg-slate-100">
           <Menu size={20} />
         </button>
-        <span className="font-semibold">Real Estate CRM</span>
+        <span className="font-heading text-lg font-semibold">Estate CRM</span>
       </header>
 
-      <main className="mx-auto max-w-6xl p-4 md:p-8">{children}</main>
+      <main key={pathname} className="page-enter mx-auto max-w-6xl p-4 md:p-8">{children}</main>
     </div>
   );
 }

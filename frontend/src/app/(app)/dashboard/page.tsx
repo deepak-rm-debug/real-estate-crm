@@ -11,6 +11,27 @@ import { useAuth } from "@/lib/auth";
 import { formatCurrency, formatDate } from "@/lib/format";
 import { LEAD_STAGES, type DashboardData, type FollowUpItem } from "@/lib/types";
 
+function Donut({ booked, total }: { booked: number; total: number }) {
+  const r = 42;
+  const c = 2 * Math.PI * r;
+  const pct = total ? booked / total : 0;
+  return (
+    <svg viewBox="0 0 100 100" className="h-32 w-32 -rotate-90" role="img" aria-label={`${Math.round(pct * 100)} percent of units booked`}>
+      <circle cx="50" cy="50" r={r} fill="none" strokeWidth="12" className="stroke-emerald-200" />
+      <circle
+        cx="50"
+        cy="50"
+        r={r}
+        fill="none"
+        strokeWidth="12"
+        strokeLinecap="round"
+        className="stroke-indigo-600"
+        strokeDasharray={`${c * pct} ${c}`}
+      />
+    </svg>
+  );
+}
+
 function StatCard({
   label,
   value,
@@ -31,7 +52,7 @@ function StatCard({
     amber: "bg-amber-50 text-amber-600",
   };
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5">
+    <div className="rounded-2xl border border-slate-200 bg-white p-5 transition duration-200 hover:-translate-y-0.5 hover:shadow-md">
       <div className="flex items-center justify-between">
         <p className="text-sm text-slate-500">{label}</p>
         <span className={`flex h-9 w-9 items-center justify-center rounded-lg ${tones[tone]}`}>
@@ -111,13 +132,18 @@ export default function DashboardPage() {
 
   const maxStage = Math.max(1, ...Object.values(data.leads_by_stage));
   const occupancy = data.units_total ? Math.round((data.units_booked / data.units_total) * 100) : 0;
+  const bookedLeads = data.leads_by_stage["Booked"] ?? 0;
+  const conversion = data.total_leads ? Math.round((bookedLeads / data.total_leads) * 100) : 0;
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold">Dashboard</h1>
-        <p className="text-sm text-slate-500">
-          {isAdmin ? "Overview of the whole team" : `Your pipeline, ${user?.name}`}
+           <div className="mb-6 rounded-2xl bg-gradient-to-r from-indigo-800 to-indigo-950 p-6 text-white">
+        <p className="text-sm text-indigo-200/80">
+          {new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long" })}
+        </p>
+        <h1 className="font-heading mt-1 text-2xl font-semibold">Welcome back, {user?.name}</h1>
+        <p className="mt-1 text-sm text-indigo-100/80">
+          {isAdmin ? "Here is how the whole team is doing." : "Here is your pipeline for today."}
         </p>
       </div>
 
@@ -200,6 +226,29 @@ export default function DashboardPage() {
           )}
         </section>
       </div>
+
+      <section className="mb-6 grid gap-6 rounded-2xl border border-slate-200 bg-white p-5 sm:grid-cols-2">
+        <div className="flex items-center gap-5">
+          <div className="relative">
+            <Donut booked={data.units_booked} total={data.units_total} />
+            <span className="absolute inset-0 flex items-center justify-center text-lg font-semibold">{occupancy}%</span>
+          </div>
+          <div className="space-y-1 text-sm">
+            <h2 className="font-semibold">Inventory</h2>
+            <p className="flex items-center gap-2 text-slate-600">
+              <span className="h-2.5 w-2.5 rounded-full bg-indigo-600" /> {data.units_booked} booked
+            </p>
+            <p className="flex items-center gap-2 text-slate-600">
+              <span className="h-2.5 w-2.5 rounded-full bg-emerald-200" /> {data.units_available} available
+            </p>
+          </div>
+        </div>
+        <div className="flex flex-col justify-center">
+          <h2 className="font-semibold">Lead to booking conversion</h2>
+          <p className="font-heading mt-2 text-4xl font-semibold text-indigo-700">{conversion}%</p>
+          <p className="text-sm text-slate-500">{bookedLeads} of {data.total_leads} leads booked</p>
+        </div>
+      </section>
 
       {/* Follow-ups */}
       <div className="grid gap-6 lg:grid-cols-2">

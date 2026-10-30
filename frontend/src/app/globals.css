@@ -1,26 +1,51 @@
+
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  /* Re-theme: every existing "indigo" class now renders deep teal */
+  --color-indigo-50: #ecf6f7;
+  --color-indigo-100: #d3eaed;
+  --color-indigo-200: #a9d4da;
+  --color-indigo-300: #78b8c2;
+  --color-indigo-400: #4a97a5;
+  --color-indigo-500: #2b7a8a;
+  --color-indigo-600: #1d6272;
+  --color-indigo-700: #174e5c;
+  --color-indigo-800: #133f4a;
+  --color-indigo-900: #0f323b;
+  --color-indigo-950: #091f25;
+
+  /* Gold accent */
+  --color-gold-100: #f8edd6;
+  --color-gold-400: #d9a94f;
+  --color-gold-500: #c8963e;
+  --color-gold-600: #a87a2c;
+
+  --font-heading: var(--font-playfair), Georgia, serif;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: ui-sans-serif, system-ui, "Segoe UI", Roboto, sans-serif;
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+.page-enter {
+  animation: fade-up 0.35s ease-out both;
+}
+
+button:not(:disabled):active,
+a[href]:active {
+  transform: scale(0.97);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-enter { animation: none; }
 }

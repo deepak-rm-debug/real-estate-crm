@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { MapPin, Plus } from "lucide-react";
+import { LayoutGrid, List, MapPin, Plus } from "lucide-react";
 
+import { NewBookingModal } from "@/components/bookings/NewBookingModal";
 import { AddBuildingModal, AddProjectModal, AddUnitModal } from "@/components/properties/PropertyModals";
+import { UnitGrid } from "@/components/properties/UnitGrid";
 import { Pagination } from "@/components/ui/Pagination";
 import { EmptyState, ErrorState, ListSkeleton } from "@/components/ui/States";
 import { inputClass, primaryBtn, secondaryBtn } from "@/components/ui/styles";
@@ -80,6 +82,8 @@ export default function PropertiesPage() {
   const [status, setStatus] = useState("");
   const [page, setPage] = useState(1);
   const [modal, setModal] = useState<"project" | "building" | "unit" | null>(null);
+  const [view, setView] = useState<"list" | "grid">("list");
+  const [bookUnitId, setBookUnitId] = useState<number | null>(null);
 
   const projects = useQuery({
     queryKey: ["projects"],
@@ -165,7 +169,7 @@ export default function PropertiesPage() {
                 key={p.id}
                 aria-pressed={active}
                 onClick={() => selectProject(p.id)}
-                className={`rounded-2xl border p-4 text-left transition ${
+                className={`rounded-2xl border p-4 text-left transition duration-200 hover:-translate-y-0.5 hover:shadow-md ${
                   active ? "border-indigo-500 bg-indigo-50 ring-2 ring-indigo-100" : "border-slate-200 bg-white hover:border-slate-300"
                 }`}
               >
@@ -182,6 +186,23 @@ export default function PropertiesPage() {
           })}
         </div>
       )}
+
+      <div className="mb-3 inline-flex rounded-lg border border-slate-300 bg-white p-0.5 text-sm">
+        <button
+          onClick={() => setView("list")}
+          aria-pressed={view === "list"}
+          className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 ${view === "list" ? "bg-indigo-600 text-white" : "text-slate-600"}`}
+        >
+          <List size={14} /> List
+        </button>
+        <button
+          onClick={() => setView("grid")}
+          aria-pressed={view === "grid"}
+          className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 ${view === "grid" ? "bg-indigo-600 text-white" : "text-slate-600"}`}
+        >
+          <LayoutGrid size={14} /> Availability grid
+        </button>
+      </div>
 
       {/* Filters */}
       <div className="mb-4 grid gap-3 sm:grid-cols-3">
@@ -233,7 +254,9 @@ export default function PropertiesPage() {
       </div>
 
       {/* Units */}
-      {units.isLoading ? (
+      {view === "grid" ? (
+        <UnitGrid projectId={projectId} buildingId={buildingId} onPick={setBookUnitId} />
+      ) : units.isLoading ? (
         <ListSkeleton />
       ) : units.isError ? (
         <ErrorState message={(units.error as Error).message} onRetry={() => units.refetch()} />
@@ -252,6 +275,12 @@ export default function PropertiesPage() {
         )
       )}
 
+      <NewBookingModal
+        key={bookUnitId ?? "none"}
+        open={bookUnitId !== null}
+        onClose={() => setBookUnitId(null)}
+        defaultUnitId={bookUnitId ?? undefined}
+      />
       <AddProjectModal open={modal === "project"} onClose={() => setModal(null)} />
       <AddBuildingModal
         open={modal === "building"}

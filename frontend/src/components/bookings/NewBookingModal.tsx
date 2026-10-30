@@ -16,12 +16,13 @@ interface Props {
   open: boolean;
   onClose: () => void;
   defaultLeadId?: number;
+  defaultUnitId?: number;
 }
 
-export function NewBookingModal({ open, onClose, defaultLeadId }: Props) {
+export function NewBookingModal({ open, onClose, defaultLeadId, defaultUnitId }: Props) {
   const qc = useQueryClient();
   const [leadId, setLeadId] = useState(defaultLeadId ? String(defaultLeadId) : "");
-  const [unitId, setUnitId] = useState("");
+  const [unitId, setUnitId] = useState(defaultUnitId ? String(defaultUnitId) : "");
   const [amount, setAmount] = useState("");
   const [error, setError] = useState("");
 

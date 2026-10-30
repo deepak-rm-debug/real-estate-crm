@@ -4,17 +4,18 @@ import { useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, CalendarCheck, Loader2, Mail, Pencil, Phone } from "lucide-react";
+import { ArrowLeft, CalendarCheck, Loader2, Mail, MessageCircle, Pencil, Phone } from "lucide-react";
 import { toast } from "sonner";
 
 import { NewBookingModal } from "@/components/bookings/NewBookingModal";
 import { EditLeadModal } from "@/components/leads/EditLeadModal";
+import { Avatar } from "@/components/ui/Avatar";
 import { StageBadge } from "@/components/ui/StageBadge";
 import { EmptyState, ErrorState, ListSkeleton } from "@/components/ui/States";
 import { inputClass, primaryBtn, secondaryBtn } from "@/components/ui/styles";
 import { ApiError, api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
-import { formatCurrency, formatDate, formatDateTime, todayISO } from "@/lib/format";
+import { formatCurrency, formatDate, formatDateTime, todayISO, whatsappLink } from "@/lib/format";
 import { LEAD_STAGES, type ActivityItem, type LeadDetail, type User } from "@/lib/types";
 
 function describe(a: ActivityItem): string {
@@ -125,6 +126,7 @@ export default function LeadDetailPage() {
       <div className="mb-6 flex flex-wrap items-start justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-5">
         <div>
           <div className="flex flex-wrap items-center gap-3">
+            <Avatar name={l.name} size="lg" />
             <h1 className="text-2xl font-semibold">{l.name}</h1>
             <StageBadge stage={l.stage} />
           </div>
@@ -134,6 +136,12 @@ export default function LeadDetailPage() {
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
+          <a href={`tel:${l.phone}`} className={secondaryBtn}>
+            <Phone size={14} /> Call
+          </a>
+          <a href={whatsappLink(l.phone)} target="_blank" rel="noopener noreferrer" className={secondaryBtn}>
+            <MessageCircle size={14} /> WhatsApp
+          </a>
           <button className={secondaryBtn} onClick={() => setShowEdit(true)}>
             <Pencil size={14} /> Edit
           </button>

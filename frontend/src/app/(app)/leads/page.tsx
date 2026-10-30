@@ -3,9 +3,10 @@
 import { useState } from "react";
 import Link from "next/link";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { Plus, Search } from "lucide-react";
+import { MessageCircle, Phone, Plus, Search } from "lucide-react";
 
 import { NewLeadModal } from "@/components/leads/NewLeadModal";
+import { Avatar } from "@/components/ui/Avatar";
 import { Pagination } from "@/components/ui/Pagination";
 import { StageBadge } from "@/components/ui/StageBadge";
 import { EmptyState, ErrorState, ListSkeleton } from "@/components/ui/States";
@@ -13,7 +14,7 @@ import { inputClass, primaryBtn, secondaryBtn } from "@/components/ui/styles";
 import { useDebounce } from "@/hooks/useDebounce";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
-import { formatCurrency, formatDate, todayISO } from "@/lib/format";
+import { formatCurrency, formatDate, todayISO, whatsappLink } from "@/lib/format";
 import { LEAD_STAGES, type Lead, type LeadListResponse, type User } from "@/lib/types";
 
 const PAGE_SIZE = 10;
@@ -35,16 +36,22 @@ function LeadsList({ items }: { items: Lead[] }) {
               <th className="px-4 py-3 font-medium">Assigned to</th>
               <th className="px-4 py-3 font-medium">Follow-up</th>
               <th className="px-4 py-3 font-medium">Budget</th>
+              <th className="px-4 py-3" />
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
             {items.map((l) => (
-              <tr key={l.id} className="hover:bg-slate-50">
+              <tr key={l.id} className="transition-colors hover:bg-indigo-50/40">
                 <td className="px-4 py-3">
-                  <Link href={`/leads/${l.id}`} className="font-medium text-slate-900 hover:text-indigo-600">
-                    {l.name}
-                  </Link>
-                  <p className="text-xs text-slate-500">{l.phone}</p>
+                                    <div className="flex items-center gap-3">
+                    <Avatar name={l.name} />
+                    <div>
+                      <Link href={`/leads/${l.id}`} className="font-medium text-slate-900 hover:text-indigo-600">
+                        {l.name}
+                      </Link>
+                      <p className="text-xs text-slate-500">{l.phone}</p>
+                    </div>
+                  </div>
                 </td>
                 <td className="px-4 py-3"><StageBadge stage={l.stage} /></td>
                 <td className="px-4 py-3 text-slate-600">{l.assignee?.name ?? "Unassigned"}</td>
@@ -55,6 +62,16 @@ function LeadsList({ items }: { items: Lead[] }) {
                   {isOverdue(l) && <span className="ml-2 rounded bg-red-100 px-1.5 py-0.5 text-[10px] font-medium text-red-700">Overdue</span>}
                 </td>
                 <td className="px-4 py-3 text-slate-600">{formatCurrency(l.budget)}</td>
+                <td className="px-4 py-3">
+                  <div className="flex justify-end gap-1">
+                    <a href={`tel:${l.phone}`} aria-label={`Call ${l.name}`} className="rounded-lg bg-sky-50 p-2 text-sky-600 transition hover:scale-110 hover:bg-sky-100">
+                      <Phone size={16} />
+                    </a>
+                    <a href={whatsappLink(l.phone)} target="_blank" rel="noopener noreferrer" aria-label={`WhatsApp ${l.name}`} className="rounded-lg bg-emerald-50 p-2 text-emerald-600 transition hover:scale-110 hover:bg-emerald-100">
+                      <MessageCircle size={16} />
+                    </a>
+                  </div>
+                </td>
               </tr>
             ))}
           </tbody>

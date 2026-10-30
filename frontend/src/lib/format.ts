@@ -1,10 +1,12 @@
+
 export function formatCurrency(value: string | number | null | undefined): string {
   if (value === null || value === undefined || value === "") return "-";
-  return new Intl.NumberFormat("en-IN", {
-    style: "currency",
-    currency: "INR",
-    maximumFractionDigits: 0,
-  }).format(Number(value));
+  const n = Number(value);
+  if (Number.isNaN(n)) return "-";
+  const trim = (x: number) => x.toFixed(2).replace(/\.?0+$/, "");
+  if (n >= 10000000) return `₹${trim(n / 10000000)} Cr`;
+  if (n >= 100000) return `₹${trim(n / 100000)} L`;
+  return `₹${new Intl.NumberFormat("en-IN").format(n)}`;
 }
 
 export function formatDate(value: string | null | undefined): string {
@@ -15,4 +17,12 @@ export function formatDate(value: string | null | undefined): string {
 
 export function todayISO(): string {
   return new Date().toLocaleDateString("en-CA"); // YYYY-MM-DD in local time
+}
+
+///new lines///
+
+export function whatsappLink(phone: string): string {
+  const digits = phone.replace(/\D/g, "");
+  const full = digits.length === 10 ? `91${digits}` : digits;
+  return `https://wa.me/${full}`;
 }
