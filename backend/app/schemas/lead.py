@@ -1,10 +1,23 @@
 import re
 from datetime import date, datetime
 from decimal import Decimal
+from typing import Literal
 
-from pydantic import BaseModel, EmailStr, Field, field_validator
+from pydantic import BaseModel, EmailStr, Field, computed_field, field_validator, model_validator
 
 from app.models.enums import LeadStage
+from app.services.lead_health import compute_health
+
+LOST_REASONS = [
+    "Price too high",
+    "Location not suitable",
+    "Chose a competitor",
+    "No response",
+    "Not interested",
+    "Other",
+]
+
+UnitType = Literal["1BHK", "2BHK", "3BHK", "Villa"]
 
 
 def clean_phone(value: str) -> str:
@@ -15,6 +28,7 @@ def clean_phone(value: str) -> str:
 
 
 class LeadBase(BaseModel):
+    preferred_type: UnitType | None = None
     name: str = Field(min_length=2, max_length=150)
     phone: str
     email: EmailStr | None = None
@@ -43,6 +57,7 @@ class LeadCreate(LeadBase):
 
 
 class LeadUpdate(BaseModel):
+    preferred_type: UnitType | None = None
     name: str | None = Field(default=None, min_length=2, max_length=150)
     phone: str | None = None
     email: EmailStr | None = None
@@ -63,6 +78,16 @@ class LeadUpdate(BaseModel):
 
 class StageUpdate(BaseModel):
     stage: LeadStage
+    lost_reason: str | None = None
+
+    @model_validator(mode="after")
+    def check_lost_reason(self):
+        if self.stage == LeadStage.lost:
+            if self.lost_reason not in LOST_REASONS:
+                raise ValueError("Select a reason for losing this lead")
+        else:
+            self.lost_reason = None
+        return self
 
 
 class AssignUpdate(BaseModel):
@@ -121,6 +146,18 @@ class LeadOut(BaseModel):
     follow_up_date: date | None = None
     created_at: datetime
     updated_at: datetime
+    lost_reason: str | None = None
+    preferred_type: str | None = None
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def health(self) -> str | None:
+        return compute_health(self.stage, self.follow_up_date, self.updated_at, self.budget)[0]
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def health_reasons(self) -> list[str]:
+        return compute_health(self.stage, self.follow_up_date, self.updated_at, self.budget)[2]
 
     model_config = {"from_attributes": True}
 
@@ -135,3 +172,17 @@ class LeadList(BaseModel):
     total: int
     page: int
     page_size: int
+
+
+
+
+class MatchOut(BaseModel):
+    id: int
+    project_name: str
+    building_name: str
+    unit_number: str
+    floor: int
+    type: str
+    area_sqft: int
+    price: Decimal
+    fit: str    

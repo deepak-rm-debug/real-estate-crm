@@ -25,6 +25,8 @@ class Lead(Base):
     assigned_to: Mapped[int | None] = mapped_column(ForeignKey("users.id"), index=True)
     created_by: Mapped[int | None] = mapped_column(ForeignKey("users.id"))
     follow_up_date: Mapped[date | None] = mapped_column(Date, index=True)
+    lost_reason: Mapped[str | None] = mapped_column(String(50))
+    preferred_type: Mapped[str | None] = mapped_column(String(20))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()

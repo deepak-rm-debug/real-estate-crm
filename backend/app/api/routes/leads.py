@@ -1,4 +1,5 @@
 from datetime import date
+from decimal import Decimal
 from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -7,11 +8,11 @@ from sqlalchemy.orm import Session, joinedload
 
 from app.core.deps import get_current_user, require_admin
 from app.db.session import get_db
-from app.models import Booking, Lead, LeadActivity, LeadNote, User
-from app.models.enums import BookingStatus, LeadStage, UserRole
+from app.models import Booking, Building, Lead, LeadActivity, LeadNote, Unit, User
+from app.models.enums import BookingStatus, LeadStage, UnitStatus, UserRole
 from app.schemas.lead import (
     AssignUpdate, LeadCreate, LeadDetail, LeadList, LeadOut,
-    LeadUpdate, NoteCreate, NoteOut, StageUpdate,
+    LeadUpdate, MatchOut, NoteCreate, NoteOut, StageUpdate,
 )
 
 router = APIRouter(prefix="/api/leads", tags=["Leads"])
@@ -154,8 +155,10 @@ def change_stage(lead_id: int, data: StageUpdate, db: Session = Depends(get_db),
         if has_active:
             raise HTTPException(status_code=400, detail="Cancel the booking first to change this lead's stage")
 
-    log_activity(db, lead.id, user.id, "stage_changed", old=lead.stage.value, new=data.stage.value)
+    new_value = f"{data.stage.value} ({data.lost_reason})" if data.lost_reason else data.stage.value
+    log_activity(db, lead.id, user.id, "stage_changed", old=lead.stage.value, new=new_value)
     lead.stage = data.stage
+    lead.lost_reason = data.lost_reason
     db.commit()
     db.refresh(lead)
     return lead
@@ -185,3 +188,46 @@ def add_note(lead_id: int, data: NoteCreate, db: Session = Depends(get_db), user
     db.commit()
     db.refresh(note)
     return note
+
+
+
+
+
+
+@router.get("/{lead_id}/matches", response_model=list[MatchOut])
+def matching_units(lead_id: int, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    lead = get_lead_or_404(db, lead_id, user)
+    if not lead.budget and not lead.preferred_type:
+        return []
+
+    query = (
+        db.query(Unit)
+        .join(Unit.building)
+        .options(joinedload(Unit.building).joinedload(Building.project))
+        .filter(Unit.status == UnitStatus.available)
+    )
+    if lead.preferred_type:
+        query = query.filter(Unit.type == lead.preferred_type)
+    if lead.budget:
+        query = query.filter(Unit.price <= lead.budget * Decimal("1.1"))
+
+    result = []
+    for u in query.order_by(Unit.price.desc()).limit(6).all():
+        if lead.budget and u.price > lead.budget:
+            fit = "Up to 10% above budget"
+        elif lead.budget:
+            fit = "Within budget"
+        else:
+            fit = "Matches preferred type"
+        result.append({
+            "id": u.id,
+            "project_name": u.building.project.name,
+            "building_name": u.building.name,
+            "unit_number": u.unit_number,
+            "floor": u.floor,
+            "type": u.type,
+            "area_sqft": u.area_sqft,
+            "price": u.price,
+            "fit": fit,
+        })
+    return result

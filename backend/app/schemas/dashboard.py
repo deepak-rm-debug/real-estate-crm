@@ -17,6 +17,16 @@ class FollowUpItem(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class PriorityLead(BaseModel):
+    id: int
+    name: str
+    phone: str
+    stage: LeadStage
+    health: str
+    score: int
+    reasons: list[str]
+
+
 class DashboardOut(BaseModel):
     total_leads: int
     new_leads_this_week: int
@@ -31,3 +41,4 @@ class DashboardOut(BaseModel):
     units_available: int
     units_booked: int
     recent_bookings: list[BookingOut]
+    priority_leads: list[PriorityLead]

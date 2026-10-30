@@ -10,6 +10,7 @@ from app.db.session import get_db
 from app.models import Booking, Lead, Unit, User
 from app.models.enums import BookingStatus, LeadStage, UnitStatus, UserRole
 from app.schemas.dashboard import DashboardOut
+from app.services.lead_health import compute_health
 
 router = APIRouter(prefix="/api/dashboard", tags=["Dashboard"])
 
@@ -48,6 +49,16 @@ def dashboard(db: Session = Depends(get_db), user: User = Depends(get_current_us
     booking_value = booking_q.with_entities(func.coalesce(func.sum(Booking.amount), 0)).scalar()
     recent = booking_q.options(*load_options()).order_by(Booking.created_at.desc()).limit(5).all()
 
+    # ---- who to call first (rule-based health score) ----
+    priority = []
+    for lead in lead_q.filter(Lead.stage.notin_([LeadStage.booked, LeadStage.lost])).all():
+        label, score, reasons = compute_health(lead.stage, lead.follow_up_date, lead.updated_at, lead.budget)
+        priority.append({
+            "id": lead.id, "name": lead.name, "phone": lead.phone, "stage": lead.stage,
+            "health": label, "score": score, "reasons": reasons[:3],
+        })
+    priority.sort(key=lambda p: p["score"], reverse=True)
+
     # ---- inventory ----
     unit_counts = dict(db.query(Unit.status, func.count(Unit.id)).group_by(Unit.status).all())
 
@@ -65,4 +76,5 @@ def dashboard(db: Session = Depends(get_db), user: User = Depends(get_current_us
         "units_available": unit_counts.get(UnitStatus.available, 0),
         "units_booked": unit_counts.get(UnitStatus.booked, 0),
         "recent_bookings": [booking_to_out(b) for b in recent],
+        "priority_leads": priority[:5],
     }
