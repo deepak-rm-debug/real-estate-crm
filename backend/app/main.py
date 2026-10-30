@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.db.session import get_db
-from app.api.routes import analytics, auth, bookings, dashboard, leads, properties, users
+from app.api.routes import analytics, auth, bookings, dashboard, leads, properties, search, users
 app = FastAPI(title="Real Estate CRM API", version="1.0.0")
 
 app.add_middleware(
@@ -23,6 +23,7 @@ app.include_router(properties.router)
 app.include_router(bookings.router)
 app.include_router(dashboard.router)
 app.include_router(analytics.router)
+app.include_router(search.router)
 
 @app.get("/health")
 def health(db: Session = Depends(get_db)):

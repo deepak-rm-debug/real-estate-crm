@@ -8,6 +8,7 @@ import { NewBookingModal } from "@/components/bookings/NewBookingModal";
 import { AddBuildingModal, AddProjectModal, AddUnitModal } from "@/components/properties/PropertyModals";
 import { UnitGrid } from "@/components/properties/UnitGrid";
 import { Pagination } from "@/components/ui/Pagination";
+import { SkylineArt } from "@/components/ui/SkylineArt";
 import { EmptyState, ErrorState, ListSkeleton } from "@/components/ui/States";
 import { inputClass, primaryBtn, secondaryBtn } from "@/components/ui/styles";
 import { UnitStatusBadge } from "@/components/ui/UnitStatusBadge";
@@ -169,10 +170,17 @@ export default function PropertiesPage() {
                 key={p.id}
                 aria-pressed={active}
                 onClick={() => selectProject(p.id)}
-                className={`rounded-2xl border p-4 text-left transition duration-200 hover:-translate-y-0.5 hover:shadow-md ${
+                className={`overflow-hidden rounded-2xl border p-4 text-left transition duration-200 hover:-translate-y-0.5 hover:shadow-md ${
                   active ? "border-indigo-500 bg-indigo-50 ring-2 ring-indigo-100" : "border-slate-200 bg-white hover:border-slate-300"
                 }`}
               >
+                <div
+                  className={`relative -mx-4 -mt-4 mb-3 h-20 overflow-hidden bg-gradient-to-br ${
+                    ["from-indigo-600 to-indigo-900", "from-indigo-800 to-indigo-950", "from-gold-600 to-indigo-900"][p.id % 3]
+                  }`}
+                >
+                  <SkylineArt className="absolute inset-x-0 bottom-0 h-full w-full text-white/15" />
+                </div>
                 <p className="font-semibold">{p.name}</p>
                 <p className="mt-0.5 flex items-center gap-1 text-xs text-slate-500">
                   <MapPin size={12} /> {p.location}

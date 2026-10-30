@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Field } from "@/components/ui/Field";
 import { Modal } from "@/components/ui/Modal";
 import { inputClass, primaryBtn, secondaryBtn } from "@/components/ui/styles";
+import { SuccessCheck } from "@/components/ui/SuccessCheck";
 import { api } from "@/lib/api";
 import { formatCurrency } from "@/lib/format";
 import type { Booking, LeadListResponse, UnitListResponse } from "@/lib/types";
@@ -25,6 +26,7 @@ export function NewBookingModal({ open, onClose, defaultLeadId, defaultUnitId }:
   const [unitId, setUnitId] = useState(defaultUnitId ? String(defaultUnitId) : "");
   const [amount, setAmount] = useState("");
   const [error, setError] = useState("");
+  const [done, setDone] = useState<{ lead: string; unit: string } | null>(null);
 
   const leads = useQuery({
     queryKey: ["leads", "bookable"],
@@ -46,7 +48,7 @@ export function NewBookingModal({ open, onClose, defaultLeadId, defaultUnitId }:
         method: "POST",
         body: { lead_id: Number(leadId), unit_id: Number(unitId), amount: amount ? Number(amount) : null },
       }),
-    onSuccess: () => {
+    onSuccess: (booking) => {
       toast.success("Booking confirmed");
       for (const key of ["bookings", "leads", "units", "projects", "buildings", "dashboard"]) {
         qc.invalidateQueries({ queryKey: [key] });
@@ -54,7 +56,11 @@ export function NewBookingModal({ open, onClose, defaultLeadId, defaultUnitId }:
       setUnitId("");
       setAmount("");
       setError("");
-      onClose();
+      setDone({ lead: booking.lead_name, unit: booking.unit_label });
+      window.setTimeout(() => {
+        setDone(null);
+        onClose();
+      }, 1700);
     },
     onError: (e: Error) => {
       setError(e.message);
@@ -64,69 +70,73 @@ export function NewBookingModal({ open, onClose, defaultLeadId, defaultUnitId }:
   });
 
   return (
-    <Modal open={open} title="New booking" onClose={onClose}>
-      <form
-        className="space-y-4"
-        onSubmit={(e) => {
-          e.preventDefault();
-          setError("");
-          mutation.mutate();
-        }}
-      >
-        <Field label="Lead *" htmlFor="bk-lead">
-          <select id="bk-lead" required className={inputClass} value={leadId} onChange={(e) => setLeadId(e.target.value)}>
-            <option value="">{leads.isLoading ? "Loading leads..." : "Select lead"}</option>
-            {bookableLeads.map((l) => (
-              <option key={l.id} value={l.id}>{l.name} ({l.stage})</option>
-            ))}
-          </select>
-        </Field>
+    <Modal open={open} title={done ? "Booking confirmed" : "New booking"} onClose={onClose}>
+      {done ? (
+        <SuccessCheck title="Booking confirmed" subtitle={`${done.unit} is now booked for ${done.lead}`} />
+      ) : (
+        <form
+          className="space-y-4"
+          onSubmit={(e) => {
+            e.preventDefault();
+            setError("");
+            mutation.mutate();
+          }}
+        >
+          <Field label="Lead *" htmlFor="bk-lead">
+            <select id="bk-lead" required className={inputClass} value={leadId} onChange={(e) => setLeadId(e.target.value)}>
+              <option value="">{leads.isLoading ? "Loading leads..." : "Select lead"}</option>
+              {bookableLeads.map((l) => (
+                <option key={l.id} value={l.id}>{l.name} ({l.stage})</option>
+              ))}
+            </select>
+          </Field>
 
-        <Field label="Unit *" htmlFor="bk-unit">
-          <select
-            id="bk-unit"
-            required
-            className={inputClass}
-            value={unitId}
-            onChange={(e) => {
-              setUnitId(e.target.value);
-              setAmount("");
-            }}
-          >
-            <option value="">{units.isLoading ? "Loading units..." : "Select available unit"}</option>
-            {(units.data?.items ?? []).map((u) => (
-              <option key={u.id} value={u.id}>
-                {u.project_name} · {u.building_name}-{u.unit_number} · {u.type} · {formatCurrency(u.price)}
-              </option>
-            ))}
-          </select>
-        </Field>
+          <Field label="Unit *" htmlFor="bk-unit">
+            <select
+              id="bk-unit"
+              required
+              className={inputClass}
+              value={unitId}
+              onChange={(e) => {
+                setUnitId(e.target.value);
+                setAmount("");
+              }}
+            >
+              <option value="">{units.isLoading ? "Loading units..." : "Select available unit"}</option>
+              {(units.data?.items ?? []).map((u) => (
+                <option key={u.id} value={u.id}>
+                  {u.project_name} · {u.building_name}-{u.unit_number} · {u.type} · {formatCurrency(u.price)}
+                </option>
+              ))}
+            </select>
+          </Field>
 
-        <Field label="Booking amount (INR)" htmlFor="bk-amount">
-          <input
-            id="bk-amount"
-            type="number"
-            min={1}
-            className={inputClass}
-            placeholder={selectedUnit ? `Default: ${selectedUnit.price}` : "Defaults to unit price"}
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-          />
-        </Field>
+          <Field label="Booking amount (INR)" htmlFor="bk-amount">
+            <input
+              id="bk-amount"
+              type="number"
+              min={1}
+              className={inputClass}
+              placeholder={selectedUnit ? `Default: ${selectedUnit.price}` : "Defaults to unit price"}
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+            />
+          </Field>
 
-        {(leads.isError || units.isError) && (
-          <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">Could not load leads or units. Close and try again.</p>
-        )}
-        {error && <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
+          {(leads.isError || units.isError) && (
+            <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">Could not load leads or units. Close and try again.</p>
+          )}
+          {error && <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
 
-        <div className="flex justify-end gap-2 pt-2">
-          <button type="button" className={secondaryBtn} onClick={onClose}>Cancel</button>
-          <button type="submit" className={primaryBtn} disabled={mutation.isPending}>
-            {mutation.isPending && <Loader2 size={16} className="animate-spin" />}
-            Confirm booking
-          </button>
-        </div>
-      </form>
+          <div className="flex justify-end gap-2 pt-2">
+            <button type="button" className={secondaryBtn} onClick={onClose}>Cancel</button>
+            <button type="submit" className={primaryBtn} disabled={mutation.isPending}>
+              {mutation.isPending && <Loader2 size={16} className="animate-spin" />}
+              Confirm booking
+            </button>
+          </div>
+        </form>
+      )}
     </Modal>
   );
 }

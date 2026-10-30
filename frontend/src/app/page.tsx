@@ -1,20 +1,4 @@
-// "use client";
 
-// import { useEffect } from "react";
-// import { useRouter } from "next/navigation";
-
-// import { useAuth } from "@/lib/auth";
-
-// export default function Home() {
-//   const { user, loading } = useAuth();
-//   const router = useRouter();
-
-//   useEffect(() => {
-//     if (!loading) router.replace(user ? "/dashboard" : "/login");
-//   }, [user, loading, router]);
-
-//   return null;
-// }
 "use client";
 
 import Link from "next/link";
@@ -28,6 +12,7 @@ import {
   Users,
 } from "lucide-react";
 
+import { CursorSparkle } from "@/components/effects/CursorSparkle";
 import { useAuth } from "@/lib/auth";
 
 const FEATURES = [
@@ -127,6 +112,7 @@ export default function LandingPage() {
       {/* Hero */}
       <section className="relative overflow-hidden bg-gradient-to-br from-indigo-900 via-indigo-900 to-indigo-950 text-white">
         <Skyline />
+        <CursorSparkle />
         <header className="relative z-10 mx-auto flex max-w-6xl items-center justify-between px-5 py-5">
           <Link href="/" className="flex items-center gap-3">
             <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gold-500 text-indigo-950">

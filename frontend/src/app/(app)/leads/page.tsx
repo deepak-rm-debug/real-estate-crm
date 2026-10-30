@@ -70,10 +70,10 @@ function LeadsList({ items }: { items: Lead[] }) {
                 <td className="px-4 py-3 text-slate-600">{formatCurrency(l.budget)}</td>
                 <td className="px-4 py-3">
                   <div className="flex justify-end gap-1">
-                    <a href={`tel:${l.phone}`} aria-label={`Call ${l.name}`} className="rounded-lg bg-sky-50 p-2 text-sky-600 transition hover:scale-110 hover:bg-sky-100">
+                    <a href={`tel:${l.phone}`} aria-label={`Call ${l.name}`} data-tip="Call" className="rounded-lg bg-sky-50 p-2 text-sky-600 transition hover:scale-110 hover:bg-sky-100">
                       <Phone size={16} />
                     </a>
-                    <a href={whatsappLink(l.phone)} target="_blank" rel="noopener noreferrer" aria-label={`WhatsApp ${l.name}`} className="rounded-lg bg-emerald-50 p-2 text-emerald-600 transition hover:scale-110 hover:bg-emerald-100">
+                    <a href={whatsappLink(l.phone)} target="_blank" rel="noopener noreferrer" aria-label={`WhatsApp ${l.name}`} data-tip="WhatsApp" className="rounded-lg bg-emerald-50 p-2 text-emerald-600 transition hover:scale-110 hover:bg-emerald-100">
                       <MessageCircle size={16} />
                     </a>
                   </div>

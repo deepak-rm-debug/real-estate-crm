@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 
+import { BarFill } from "@/components/ui/Animated";
 import { Avatar } from "@/components/ui/Avatar";
 import { EmptyState, ErrorState, ListSkeleton } from "@/components/ui/States";
 import { secondaryBtn } from "@/components/ui/styles";
@@ -83,7 +84,7 @@ export default function InsightsPage() {
                     <td className="py-3">
                       <div className="flex items-center gap-3">
                         <div className="h-2 w-32 overflow-hidden rounded-full bg-slate-100">
-                          <div className="h-full rounded-full bg-indigo-500" style={{ width: `${(s.leads / maxLeads) * 100}%` }} />
+                          <BarFill pct={(s.leads / maxLeads) * 100} className="bg-indigo-500" />
                         </div>
                         <span>{s.leads}</span>
                       </div>
@@ -115,7 +116,7 @@ export default function InsightsPage() {
                     <span className="font-medium">{r.count}</span>
                   </div>
                   <div className="h-2 overflow-hidden rounded-full bg-slate-100">
-                    <div className="h-full rounded-full bg-red-400" style={{ width: `${(r.count / maxLost) * 100}%` }} />
+                    <BarFill pct={(r.count / maxLost) * 100} className="bg-red-400" />
                   </div>
                 </li>
               ))}
