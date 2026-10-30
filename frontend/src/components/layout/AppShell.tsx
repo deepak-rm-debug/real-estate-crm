@@ -149,21 +149,40 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       )}
 
-      {/* Desktop top bar */}
-      <header className="sticky top-0 z-20 hidden h-16 items-center gap-4 border-b border-slate-200 bg-white/80 px-8 backdrop-blur md:flex">
-        <button
-          onClick={() => setSearchOpen(true)}
-          className="flex w-full max-w-md items-center gap-3 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-400 transition hover:border-indigo-300 hover:shadow-sm"
-        >
-          <Search size={16} />
-          <span className="flex-1 text-left">Search leads, properties, units...</span>
-          <kbd className="rounded border border-slate-200 bg-slate-50 px-1.5 text-[11px] text-slate-500">Ctrl K</kbd>
-        </button>
-        <div className="ml-auto flex items-center gap-1">
-          <NotificationBell />
-          <UserMenu />
-        </div>
-      </header>
+      
+{/* Desktop top bar */}
+<header className="sticky top-0 z-20 hidden h-[76px] grid-cols-[1fr_minmax(280px,560px)_1fr] items-center border-b border-slate-200/80 bg-white/90 px-6 backdrop-blur-xl md:grid lg:px-10">
+
+  {/* Left spacing */}
+  <div />
+
+  {/* Centered search bar */}
+  <button
+    onClick={() => setSearchOpen(true)}
+    aria-label="Open search"
+    className="group flex h-12 w-full items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50/70 px-4 text-sm text-slate-500 shadow-sm transition-all duration-200 hover:border-indigo-300 hover:bg-white hover:shadow-md focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-100"
+  >
+    <Search
+      size={19}
+      className="shrink-0 text-slate-400 transition-colors group-hover:text-indigo-600"
+    />
+
+    <span className="flex-1 text-left">
+      Search leads, properties, units...
+    </span>
+
+    <kbd className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-[11px] font-medium text-slate-500 shadow-sm">
+      Ctrl K
+    </kbd>
+  </button>
+
+  {/* Right-side actions */}
+  <div className="flex items-center justify-end gap-2">
+    <NotificationBell />
+    <UserMenu />
+  </div>
+</header>
+
 
       {/* Mobile top bar */}
       <header className="sticky top-0 z-20 flex h-14 items-center gap-2 border-b border-slate-200 bg-white px-3 md:hidden">
