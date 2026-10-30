@@ -107,3 +107,48 @@ export interface Booking {
   booked_by_name: string;
   created_at: string;
 }
+
+export interface NoteItem {
+  id: number;
+  content: string;
+  created_at: string;
+  user: UserBrief | null;
+}
+
+export interface ActivityItem {
+  id: number;
+  action: string;
+  old_value: string | null;
+  new_value: string | null;
+  created_at: string;
+  user: UserBrief | null;
+}
+
+export interface LeadDetail extends Lead {
+  notes: NoteItem[];
+  activities: ActivityItem[];
+}
+
+export interface FollowUpItem {
+  id: number;
+  name: string;
+  phone: string;
+  stage: LeadStage;
+  follow_up_date: string;
+}
+
+export interface DashboardData {
+  total_leads: number;
+  new_leads_this_week: number;
+  leads_by_stage: Record<string, number>;
+  today_count: number;
+  overdue_count: number;
+  todays_followups: FollowUpItem[];
+  overdue_followups: FollowUpItem[];
+  active_bookings: number;
+  booking_value: string;
+  units_total: number;
+  units_available: number;
+  units_booked: number;
+  recent_bookings: Booking[];
+}
